@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Ghost Terminal</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:black;
+    color:#00ff88;
+    font-family:monospace;
+    overflow:hidden;
+    height:100vh;
+}
+
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+}
+
+.container{
+    padding:20px;
+    height:100vh;
+    overflow-y:auto;
+    backdrop-filter: blur(2px);
+}
+
+.title{
+    font-size:32px;
+    margin-bottom:20px;
+    text-shadow:0 0 10px #00ff88;
+}
+
+.terminal{
+    border:1px solid #00ff88;
+    padding:15px;
+    background:rgba(0,0,0,0.75);
+    box-shadow:0 0 20px #00ff8855;
+    border-radius:10px;
+}
+
+.line{
+    margin:8px 0;
+    opacity:0;
+    animation:fadeIn 0.5s forwards;
+}
+
+.input-area{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+}
+
+input{
+    flex:1;
+    background:black;
+    border:1px solid #00ff88;
+    color:#00ff88;
+    padding:12px;
+    outline:none;
+    border-radius:5px;
+    font-family:monospace;
+}
+
+button{
+    background:#00ff88;
+    color:black;
+    border:none;
+    padding:12px 20px;
+    font-weight:bold;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.stats{
+    margin-top:20px;
+    border:1px solid #00ff88;
+    padding:15px;
+    border-radius:10px;
+    background:rgba(0,0,0,0.75);
+}
+
+.glow{
+    text-shadow:0 0 8px #00ff88;
+}
+
+.warning{
+    color:red;
+    text-shadow:0 0 8px red;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+
+    <div class="title glow">
+        GHOST ACCESS TERMINAL
+    </div>
+
+    <div class="terminal" id="terminal">
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="command" placeholder="Enter command...">
+        <button onclick="runCommand()">EXECUTE</button>
+    </div>
+
+    <div class="stats">
+        <h3 class="glow">VISITOR ANALYSIS</h3>
+        <br>
+        <p id="ip">IP: Detecting...</p>
+        <p id="location">Location: Detecting...</p>
+        <p id="browser">Browser: Detecting...</p>
+        <p id="device">Device: Detecting...</p>
+        <p id="screen">Screen: Detecting...</p>
+        <p id="timezone">Timezone: Detecting...</p>
+        <br>
+        <p class="warning">WARNING: SESSION MONITORED</p>
+    </div>
+
+</div>
+
+<script>
+
+const terminal = document.getElementById("terminal");
+
+const startupLines = [
+    "[BOOT] Ghost protocol initialized...",
+    "[SCAN] Scanning visitor device...",
+    "[TRACK] Establishing anonymous route...",
+    "[SUCCESS] Access granted.",
+    "[INFO] Type commands below."
+];
+
+startupLines.forEach((line, index)=>{
+    setTimeout(()=>{
+        addLine(line);
+    }, index * 1000);
+});
+
+function addLine(text){
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = text;
+    terminal.appendChild(div);
+
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function runCommand(){
+
+    const input = document.getElementById("command");
+    const cmd = input.value.trim().toLowerCase();
+
+    if(!cmd) return;
+
+    addLine("> " + cmd);
+
+    switch(cmd){
+
+        case "help":
+            addLine("Commands:");
+            addLine("scan");
+            addLine("trace");
+            addLine("decrypt");
+            addLine("whoami");
+            addLine("clear");
+            break;
+
+        case "scan":
+            addLine("[SCAN] Checking open ports...");
+            addLine("[SCAN] Vulnerability level: LOW");
+            break;
+
+        case "trace":
+            addLine("[TRACE] Routing packets...");
+            addLine("[TRACE] Connection masked.");
+            break;
+
+        case "decrypt":
+            addLine("[DECRYPT] Attempting key extraction...");
+            addLine("[DECRYPT] ACCESS DENIED");
+            break;
+
+        case "whoami":
+            addLine("Unknown visitor");
+            addLine(navigator.userAgent);
+            break;
+
+        case "clear":
+            terminal.innerHTML = "";
+            break;
+
+        default:
+            addLine("Unknown command.");
+    }
+
+    input.value = "";
+}
+
+document.getElementById("command")
+.addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        runCommand();
+    }
+});
+
+async function loadVisitorData(){
+
+    document.getElementById("browser").innerText =
+        "Browser: " + navigator.userAgent;
+
+    document.getElementById("device").innerText =
+        "Device: " + (/Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop");
+
+    document.getElementById("screen").innerText =
+        "Screen: " + screen.width + "x" + screen.height;
+
+    document.getElementById("timezone").innerText =
+        "Timezone: " + Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    try{
+
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+
+        document.getElementById("ip").innerText =
+            "IP: " + data.ip;
+
+        document.getElementById("location").innerText =
+            "Location: " + data.city + ", " + data.country_name;
+
+    }catch(err){
+
+        document.getElementById("ip").innerText =
+            "IP: Detection failed";
+
+        document.getElementById("location").innerText =
+            "Location: Detection failed";
+    }
+}
+
+loadVisitorData();
+
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+
+const chars = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+
+const drops = [];
+
+for(let x = 0; x < columns; x++){
+    drops[x] = 1;
+}
+
+function draw(){
+
+    ctx.fillStyle = "rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle = "#00ff88";
+    ctx.font = fontSize + "px monospace";
+
+    for(let i = 0; i < drops.length; i++){
+
+        const text =
+            chars[Math.floor(Math.random()*chars.length)];
+
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if(drops[i] * fontSize > canvas.height &&
+            Math.random() > 0.975){
+            drops[i] = 0;
+        }
+
+        drops[i]++;
+    }
+}
+
+setInterval(draw, 35);
+
+</script>
+
+</body>
+</html>
