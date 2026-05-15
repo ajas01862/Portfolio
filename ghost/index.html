@@ -119,9 +119,40 @@ button{
         transform:translateY(0);
     }
 }
+
+.glitch{
+position:relative;
+font-size:40px;
+font-weight:bold;
+animation:glitch 1s infinite;
+}
+
+@keyframes glitch{
+0%{
+text-shadow:2px 2px red;
+}
+25%{
+text-shadow:-2px 0 cyan;
+}
+50%{
+text-shadow:2px -2px lime;
+}
+75%{
+text-shadow:-2px 2px magenta;
+}
+100%{
+text-shadow:2px 2px red;
+}
+}
 </style>
 </head>
 <body>
+
+<h1 class="glitch">GHOST TERMINAL</h1>
+
+<audio autoplay loop>
+<source src="https://files.catbox.moe/6tqzqv.mp3" type="audio/mp3">
+</audio>
 
 <canvas id="matrix"></canvas>
 
